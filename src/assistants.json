@@ -10,7 +10,7 @@
       "type": "function",
       "function": {
         "name": "get_lineups",
-        "description": "Get lineup stats. This returns you back a list of lineups based on the params you provide.",
+        "description": "Get lineup stats. This returns you back a list of lineups based on the params you provide. This will only return lineups that have played at least 10 minutes together.",
         "parameters": {
           "type": "object",
           "properties": {
