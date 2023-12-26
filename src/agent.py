@@ -92,7 +92,6 @@ class Agent:
             if message.assistant_id == run.assistant_id:
                 for response in message.content:
                     if response.type == "text":
-                        logging.info(f"Message ({run.thread_id}): {response.text.value}")
                         response_msg = response.text.value
                 return response_msg
 

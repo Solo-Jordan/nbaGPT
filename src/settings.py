@@ -20,6 +20,12 @@ logging.basicConfig(
     handlers=[logging.StreamHandler()]
 )
 
+# Suppress openai logging
+if logging.getLogger('httpx').isEnabledFor(logging.DEBUG):
+    logging.getLogger('httpx').setLevel(logging.INFO)
+else:
+    logging.getLogger('httpx').setLevel(logging.WARNING)
+
 # Load the environment variables
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 
