@@ -2,6 +2,7 @@ from settings import logging
 from nba_api.stats import endpoints
 import json
 
+
 TEAM_REF = {
     '1610612739': 'Cleveland Cavaliers',
     '1610612740': 'New Orleans Pelicans',
@@ -62,3 +63,8 @@ def get_lineups(**kwargs):
     ten_plus_min_lineups = [lineup for lineup in data.to_dict('records') if lineup['MIN'] >= 10.0]
 
     return json.dumps({"status": "success", "msg": ten_plus_min_lineups})
+
+
+funcs = {
+    'get_lineups': get_lineups
+}

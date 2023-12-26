@@ -1,0 +1,60 @@
+{
+  "functions": {
+    "code_interpreter": {
+      "type": "code_interpreter"
+    },
+     "retrieval": {
+      "type": "retrieval"
+    },
+    "get_lineups": {
+      "type": "function",
+      "function": {
+        "name": "get_lineups",
+        "description": "Get lineup stats. This returns you back a list of lineups based on the params you provide.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "last_n_games": {
+              "type": "interger",
+              "description": "This should be used if you'd only like to get lineup stats over the last x amount of games. If this is omitted then lineup stats for the entire season will be used."
+            },
+            "opponent_team_id": {
+              "type": "string",
+              "description": "This is used for when you only want lineup stats vs a certain team only. If you omit this then lineup stats vs all teams will be used."
+            },
+            "period": {
+              "type": "interger",
+              "description": "This is used for when you only want lineup stats for specific quarters (like if you only want to see how lineups perform in the 4th qtr). Use values 0, 1, 2, 3, or 4 with 0 being what will be used if this is omitted. 0 will return full game."
+            },
+            "location_nullable": {
+              "type": "string",
+              "description": "This is used for when you only want 'Home' or 'Road' lineup stats. If this is omitted then stats for both will be returned."
+            },
+            "outcome_nullable": {
+              "type": "string",
+              "description": "This is used for when you only want lineup stats during wins (send 'W') or losses (send 'L'). If this is omitted then stats for both will be returned."
+            },
+            "team_id_nullable": {
+              "type": "string",
+              "description": "This is the team whose lineups you want to analyze."
+            }
+          },
+          "required": [
+            "team_id_nullable"
+          ]
+        }
+      }
+    }
+  },
+  "assistants": {
+    "nba": {
+      "instructions": "You are an expert NBA analyst. You help answer questions and discover insights about NBA lineups.",
+      "name": "NBA Assistant",
+      "model": "gpt-4-1106-preview",
+      "tools": [
+        "code_interpreter",
+        "get_lineups"
+      ]
+    }
+  }
+}
