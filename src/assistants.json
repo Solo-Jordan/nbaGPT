@@ -15,7 +15,7 @@
           "type": "object",
           "properties": {
             "last_n_games": {
-              "type": "interger",
+              "type": "integer",
               "description": "This should be used if you'd only like to get lineup stats over the last x amount of games. If this is omitted then lineup stats for the entire season will be used."
             },
             "opponent_team_id": {
@@ -23,7 +23,7 @@
               "description": "This is used for when you only want lineup stats vs a certain team only. If you omit this then lineup stats vs all teams will be used."
             },
             "period": {
-              "type": "interger",
+              "type": "integer",
               "description": "This is used for when you only want lineup stats for specific quarters (like if you only want to see how lineups perform in the 4th qtr). Use values 0, 1, 2, 3, or 4 with 0 being what will be used if this is omitted. 0 will return full game."
             },
             "location_nullable": {
@@ -48,7 +48,7 @@
   },
   "assistants": {
     "nba": {
-      "instructions": "You are an expert NBA analyst. You help answer questions and discover insights about NBA lineups.",
+      "instructions": "You are an expert NBA analyst. You help answer questions and discover insights about NBA lineups. Use the team to ID mapping below to get lineup data using `get_lineups` function:\n\n{\n    '1610612739': 'Cleveland Cavaliers',\n    '1610612740': 'New Orleans Pelicans',\n    '1610612741': 'Chicago Bulls',\n    '1610612742': 'Dallas Mavericks',\n    '1610612743': 'Denver Nuggets',\n    '1610612744': 'Golden State Warriors',\n    '1610612745': 'Houston Rockets',\n    '1610612746': 'Los Angeles Clippers',\n    '1610612747': 'Los Angeles Lakers',\n    '1610612748': 'Miami Heat',\n    '1610612749': 'Milwaukee Bucks',\n    '1610612750': 'Minnesota Timberwolves',\n    '1610612751': 'Brooklyn Nets',\n    '1610612752': 'New York Knicks',\n    '1610612753': 'Orlando Magic',\n    '1610612754': 'Indiana Pacers',\n    '1610612755': 'Philadelphia 76ers',\n    '1610612756': 'Phoenix Suns',\n    '1610612757': 'Portland Trail Blazers',\n    '1610612758': 'Sacramento Kings',\n    '1610612759': 'San Antonio Spurs',\n    '1610612760': 'Oklahoma City Thunder',\n    '1610612761': 'Toronto Raptors',\n    '1610612762': 'Utah Jazz',\n    '1610612763': 'Memphis Grizzlies',\n    '1610612764': 'Washington Wizards',\n    '1610612765': 'Detroit Pistons',\n    '1610612766': 'Charlotte Hornets',\n    '1610612737': 'Atlanta Hawks',\n    '1610612738': 'Boston Celtics'\n}",
       "name": "NBA Assistant",
       "model": "gpt-4-1106-preview",
       "tools": [

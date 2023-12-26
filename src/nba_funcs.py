@@ -33,8 +33,7 @@ TEAM_REF = {
     '1610612765': 'Detroit Pistons',
     '1610612766': 'Charlotte Hornets',
     '1610612737': 'Atlanta Hawks',
-    '1610612738': 'Boston Celtics',
-
+    '1610612738': 'Boston Celtics'
 }
 
 
