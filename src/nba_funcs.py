@@ -44,6 +44,7 @@ def get_lineups(**kwargs):
     """
 
     kwargs['season'] = '2023-24'
+    kwargs['measure_type_detailed_defense'] = 'Advanced'
 
     # Get the lineups
     try:
