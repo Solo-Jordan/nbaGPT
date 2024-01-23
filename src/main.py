@@ -15,7 +15,7 @@ llm_config = {
 def get_agent(agent_call: str) -> dict:
     coll = DB['swarm_agents']
     agent_doc = coll.find_one({"call": agent_call, "org_name": "nba_autogen"})
-    logging.info(f"Got agent - tools: {agent_doc['tools']} - instructions: {agent_doc['instructions']}")
+    logging.info(f"Got agent: {agent_call}")
     return agent_doc
 
 # Create the agents
