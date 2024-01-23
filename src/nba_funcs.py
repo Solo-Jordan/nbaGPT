@@ -1,4 +1,4 @@
-from settings import logging
+from settings import logging, DB
 from nba_api.stats import endpoints
 import json
 
@@ -37,17 +37,45 @@ TEAM_REF = {
 }
 
 
+def generic_create(collection: str, content: dict | list) -> str | bool:
+    """
+    Create a document in the database.
+    :param collection: The collection name to create the document in.
+    :param content: The content of the document.
+    :return: The ID of the document.
+    """
+    logging.info(f"Creating document in {collection}.")
+    coll = DB[collection]
+    try:
+        doc_id = coll.insert_one(content).inserted_id
+        logging.info(f"Created document in {collection}.")
+        return doc_id
+    except Exception as e:
+        logging.error(f"Failed to create document in {collection}. Error: {e}")
+        return False
+
+
 def get_lineups(**kwargs):
     """
-    Get the lineups for a given team.
+    Get lineups for a team.
+    :param team_id_nullable: The ID of the team you want lineups for.
+    :param last_n_games: The number of games to look back. If not provided, will look at all games.
+    :param opponent_team_id: The ID of the opponent team. If not provided, will look at all opponents.
+    :param period: The period to look at. If not provided, will look at all periods.
+    :param location_nullable: The location to look at ('Home', 'Away'). If not provided, will look at all locations.
+    :param outcome_nullable: The outcome to look at ('W', 'L'). If not provided, will look at all outcomes.
     :return: The lineups.
     """
+
+    season = '2023-24'
+    measure_type_detailed_defense = 'Advanced'
 
     kwargs['season'] = '2023-24'
     kwargs['measure_type_detailed_defense'] = 'Advanced'
 
     # Get the lineups
     try:
+        logging.info(f"Fetching lineup for team_id: {TEAM_REF[kwargs['team_id_nullable']]}")
         data = endpoints.leaguedashlineups.LeagueDashLineups(**kwargs).get_data_frames()[0]
         logging.debug('Data fetched successfully')
     except Exception as e:
@@ -59,12 +87,33 @@ def get_lineups(**kwargs):
             }
         )
 
-    # Filter out lineups with less than 10 minutes played so we don't go over token limit on the response to assistant.
-    ten_plus_min_lineups = [lineup for lineup in data.to_dict('records') if lineup['MIN'] >= 10.0]
+    lineups = {"data": data.to_dict('records')}
 
-    return json.dumps({"status": "success", "msg": ten_plus_min_lineups})
+    schema_example = lineups['data'][0]
+    logging.info(f"Schema example: {schema_example}")
+
+    # Add the lineups to the database
+    create_result = generic_create(
+        collection='swarm_facts',
+        content=lineups
+    )
+
+    # generic_create returns False if the insert fails and the ID of the insert if it succeeds.
+    if create_result:
+        logging.info(f"Added lineups to DB.")
+
+        return json.dumps(
+            {
+                "args": kwargs,
+                "msg": f"Lineups added to DB with ID: {create_result}\n\nExample entry:\n{schema_example}"
+            }
+        )
+    else:
+        logging.error(f"Failed to add lineups to DB.")
+        return json.dumps({"args": kwargs, "msg": "Failed to add lineups to DB."})
 
 
-funcs = {
+# I'll use this later when I add more funcitons
+func_map = {
     'get_lineups': get_lineups
 }

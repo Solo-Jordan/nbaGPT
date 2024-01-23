@@ -7,6 +7,7 @@ import os
 from dotenv import load_dotenv
 import logging
 import openai
+from pymongo import MongoClient
 
 
 env_file = '../.env'
@@ -28,7 +29,13 @@ else:
 
 # Load the environment variables
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
+MONGO_DB = os.getenv('MONGO_DB')
 
 
 # Set the OpenAI API key
-openai.api_key = OPENAI_API_KEY
+CONFIG_LIST = [{'model': 'gpt-4-1106-preview', 'api_key': OPENAI_API_KEY}]
+
+# Connect to the database
+client = MongoClient(MONGO_DB)
+DB = client.swarm
+
