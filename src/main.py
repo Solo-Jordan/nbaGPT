@@ -22,7 +22,7 @@ def get_agent(agent_call: str) -> dict:
 
 
 # NBA Analyst
-# Grab the functions from the assistants.json file
+# Grab the functions from the assistants settings
 nba_analyst_settings = get_agent('nba_analyst')
 nba_analyst_config = llm_config.copy()
 nba_analyst_config["tools"] = nba_analyst_settings['tools']
@@ -33,7 +33,7 @@ nba_analyst = GPTAssistantAgent(
 )
 
 # NBA Data Guy
-# Grab the functions from the assistants.json file
+# Grab the functions from the assistants settings
 nba_data_guy_settings = get_agent('nba_data_guy')
 nba_data_guy_config = llm_config.copy()
 nba_data_guy_config["tools"] = nba_data_guy_settings['tools']
@@ -47,7 +47,7 @@ nba_data_guy = GPTAssistantAgent(
 )
 
 # Document Retriever
-# Grab the functions from the assistants.json file
+# Grab the functions from the assistants settings
 doc_retriever_settings = get_agent('doc_retriever')
 doc_retriever_config = llm_config.copy()
 doc_retriever_config["tools"] = doc_retriever_settings['tools']
