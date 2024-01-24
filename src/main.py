@@ -93,3 +93,8 @@ manager = autogen.GroupChatManager(
 user_proxy.initiate_chat(
     manager, message="What's the best GSW lineup that includes Kuminga?"
 )
+
+# Delete the assistants
+for agent in agents:
+    if agent.name != 'user_proxy':
+        agent.delete_assistant()
