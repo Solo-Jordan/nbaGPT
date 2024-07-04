@@ -70,7 +70,7 @@ user_proxy = autogen.UserProxyAgent(
     max_consecutive_auto_reply=10,
     code_execution_config={
         "work_dir": "coding",
-        "use_docker": True,
+        "use_docker": False,
     }
 )
 
