@@ -3,27 +3,19 @@ from pymongo import ASCENDING, DESCENDING
 from bson.json_util import dumps
 
 
-def create_convo_doc(main_thread_id: str, init_msg: str) -> None:
+def create_convo_doc(main_thread_id: str) -> None:
     """
     Create a convo document in the DB.
     :param main_thread_id: This is the ID of the main thread. This is a constant in the system.
-    :param init_msg: The initial message that starts the convo.
     :return:
     """
-
-    msg_dict = {
-        "message": init_msg,
-        "from_agent": "user",
-        "to_agent": "nba_analyst",
-        "msg_type": "message"
-    }
 
     _coll = DB.get_collection("swarm_convos")
     _coll.insert_one(
         {
             "id": main_thread_id,
             "org_name": "nba",
-            "convo": [msg_dict]
+            "convo": []
         }
     )
     logging.info("Created convo in DB.")

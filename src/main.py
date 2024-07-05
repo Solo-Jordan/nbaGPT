@@ -17,7 +17,7 @@ def listen_on_queue():
         main_thread_id = str(uuid.uuid4())
 
         # Create the convo document in the DB
-        create_convo_doc(main_thread_id, body['message'])
+        create_convo_doc(main_thread_id)
 
         # Call the nba_analyst function
         response = nba_analyst(main_thread_id, body['message'])
