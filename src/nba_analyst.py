@@ -14,7 +14,8 @@ def planning_step(agent: Agent) -> str:
     """
 
     # Pull the prompt
-    prompt = hub.pull("oai_nba_analyst_plan")
+    prompt_template = hub.pull("oai_nba_analyst_plan")
+    prompt = prompt_template.format()
 
     # Add the prompt to the conversation
     agent.add_message(prompt)
@@ -75,7 +76,8 @@ def analyze_data(agent: Agent, data_guy: Agent, data: str) -> str:
         evaluation = agent.do_run()
 
     # Analyze the data
-    analysis_prompt = hub.pull("oai_nba_analyst_analysis")
+    analysis_prompt_template = hub.pull("oai_nba_analyst_analysis")
+    analysis_prompt = analysis_prompt_template.format()
     agent.add_message(analysis_prompt)
 
     # Run the agent
