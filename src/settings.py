@@ -27,13 +27,19 @@ if logging.getLogger('httpx').isEnabledFor(logging.DEBUG):
 else:
     logging.getLogger('httpx').setLevel(logging.WARNING)
 
+# Suppress pika logging
+if logging.getLogger('pika').isEnabledFor(logging.DEBUG):
+    logging.getLogger('pika').setLevel(logging.INFO)
+else:
+    logging.getLogger('pika').setLevel(logging.WARNING)
+
 # Load the environment variables
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 MONGO_DB = os.getenv('MONGO_DB')
-
+SYS_MODE = os.getenv('SYS_MODE')
 
 # Set the OpenAI API key
-CONFIG_LIST = [{'model': 'gpt-4-1106-preview', 'api_key': OPENAI_API_KEY}]
+openai.api_key = OPENAI_API_KEY
 
 # Connect to the database
 client = MongoClient(MONGO_DB)
