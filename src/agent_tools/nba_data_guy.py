@@ -1,8 +1,9 @@
 from settings import logging
 from nba_api.stats import endpoints
-from db_tools import generic_create
+from db_tools import generic_create, doc_lookup
 import uuid
 from datetime import datetime
+import json
 
 TEAM_REF = {
     '1610612739': 'Cleveland Cavaliers',
@@ -354,9 +355,31 @@ def get_player_stats() -> str:
     return msg
 
 
+def data_lookup(query: str, sort: str = None, limit: int = None) -> str:
+    """
+    Lookup data in the database. This function is used to retrieve specific document data based on a given document
+    ID and query.  All queries should include the id as `doc_id`. Examples:
+
+    For since doc lookup:
+    ```
+    {"doc_id": "0000-1111-2222-3333-4444"}
+    ```
+
+    For multiple doc lookup:
+    ```
+    {"doc_id": "0000-1111-2222-3333-4444", "name": "John"}
+    ```
+    """
+
+    query_dict = json.loads(query)
+
+    return doc_lookup(query=query_dict, sort=sort, limit=limit)
+
+
 function_map = {
     "get_lineups": get_lineups,
     "get_hustle_stats_team": get_hustle_stats_team,
     "get_player_clutch_stats": get_player_clutch_stats,
-    "get_player_stats": get_player_stats
+    "get_player_stats": get_player_stats,
+    "data_lookup": data_lookup
 }
