@@ -29,6 +29,7 @@ def listen_on_queue():
     channel = connection.channel()
     channel.basic_qos(prefetch_count=1)
 
+    channel.queue_declare(queue=AGENT_QUEUE)
     channel.basic_consume(queue=AGENT_QUEUE,
                           on_message_callback=callback,
                           auto_ack=True)
