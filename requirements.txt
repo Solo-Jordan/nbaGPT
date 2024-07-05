@@ -1,7 +1,6 @@
-openai~=1.6.1
+openai
 python-dotenv~=1.0.0
-nba_api~=1.4.1
+nba_api
 pandas
-bson~=0.5.10
-pymongo~=4.6.1
-pyautogen
+bson
+pymongo
