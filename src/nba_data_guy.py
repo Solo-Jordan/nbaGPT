@@ -1,6 +1,7 @@
 from settings import logging
 from db_tools import get_agent_from_db
 from agents import Agent
+from agent_tools.nba_data_guy import function_map
 
 
 def nba_data_guy(main_thread_id: str, request: str, data_guy: Agent) -> tuple[Agent, str]:
@@ -23,13 +24,14 @@ def nba_data_guy(main_thread_id: str, request: str, data_guy: Agent) -> tuple[Ag
             instructions=db_agent["instructions"],
             model=db_agent["model"],
             tools=db_agent["tools"],
-            main_thread_id=main_thread_id
+            main_thread_id=main_thread_id,
+            function_map=function_map
         )
 
     # Add the request to the conversation
     data_guy.add_message(request)
 
-    # Get the data
-    data = get_data(data_guy)
+    # Run the agent
+    data = data_guy.do_run()
 
     return data_guy, data
