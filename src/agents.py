@@ -141,7 +141,8 @@ class Agent:
                 required_action = run.required_action.submit_tool_outputs.tool_calls
                 logging.info(f"Tools request: {required_action}")
                 # Add the function call to the convo in the database
-                self.add_to_convo(response_msg=required_action, msg_type="function_call", from_agent=self.name)
+                func_call = [{act.function.name: json.loads(act.function.arguments)} for act in required_action]
+                self.add_to_convo(response_msg=func_call, msg_type="function_call", from_agent=self.name)
                 tools_output = []
                 for action in required_action:
                     func_name = action.function.name
