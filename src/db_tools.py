@@ -1,6 +1,5 @@
 from settings import logging, DB, SYS_MODE
 from pymongo import ASCENDING, DESCENDING
-import json
 from bson.json_util import dumps
 
 
@@ -62,6 +61,32 @@ def add_to_convo(main_thread_id: str, msg_dict: dict) -> bool:
         return False
 
     return True
+
+
+def get_agent_from_db(agent_call: str, org_name: str) -> dict:
+    """
+    Get an agent from the database.
+    :param agent_call: The agent call.
+    :param org_name: The org name.
+    :return: The agent.
+    """
+
+    agents = DB['swarm_agents']
+
+    logging.info(f"Getting {agent_call} from DB.")
+
+    try:
+        agent = agents.find_one(
+            {
+                "call": agent_call,
+                "org_name": org_name
+            }
+        )
+    except Exception as e:
+        logging.error(f"Failed to get agent from DB. Error: {e}")
+        return {}
+
+    return agent
 
 
 def doc_lookup(query: dict, sort: str | None, limit: int | None) -> str:
