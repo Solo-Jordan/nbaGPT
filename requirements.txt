@@ -6,3 +6,4 @@ bson
 pymongo
 pika
 langchain
+langchainhub
