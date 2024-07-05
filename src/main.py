@@ -1,100 +1,41 @@
-from settings import logging, CONFIG_LIST, DB
-import autogen
-from autogen.agentchat.contrib.gpt_assistant_agent import GPTAssistantAgent
-from nba_funcs import get_lineups
-from db_tools import data_lookup
+from settings import logging, RMQ_URL, AGENT_QUEUE
+from nba_analyst import nba_analyst
+from db_tools import create_convo_doc
+
+from pika import BlockingConnection, URLParameters
+import json
+import uuid
 
 
-llm_config = {
-    "timeout": 90,
-    "config_list": CONFIG_LIST,
-    "temperature": 0,
-}
+def listen_on_queue():
+    # This is the callback that is called when a message is received on the agent's queue.
+    def callback(ch, method, properties, body):
+        logging.info(f"Received message: {body}")
+        body = json.loads(body)
+
+        # Create UUID for the main thread
+        main_thread_id = str(uuid.uuid4())
+
+        # Create the convo document in the DB
+        create_convo_doc(main_thread_id, body['message'])
+
+        # Call the nba_analyst function
+        nba_analyst(main_thread_id, body['message'])
+
+        logging.info(f"Listening on queue: {AGENT_QUEUE}")
+
+    parameters = URLParameters(url=RMQ_URL)
+    connection = BlockingConnection(parameters)
+    channel = connection.channel()
+    channel.basic_qos(prefetch_count=1)
+
+    channel.basic_consume(queue=AGENT_QUEUE,
+                          on_message_callback=callback,
+                          auto_ack=True)
+
+    logging.info(f"Listening on queue: {AGENT_QUEUE}")
+    channel.start_consuming()
 
 
-def get_agent(agent_call: str) -> dict:
-    coll = DB['swarm_agents']
-    agent_doc = coll.find_one({"call": agent_call, "org_name": "nba_autogen"})
-    logging.info(f"Got agent: {agent_call}")
-    return agent_doc
-
-# Create the agents
-
-
-# NBA Analyst
-# Grab the functions from the assistants settings
-nba_analyst_settings = get_agent('nba_analyst')
-nba_analyst_config = llm_config.copy()
-nba_analyst_config["tools"] = nba_analyst_settings['tools']
-nba_analyst = GPTAssistantAgent(
-    name="NBA_Analyst",
-    instructions=nba_analyst_settings['instructions'],
-    llm_config=nba_analyst_config
-)
-
-# NBA Data Guy
-# Grab the functions from the assistants settings
-nba_data_guy_settings = get_agent('nba_data_guy')
-nba_data_guy_config = llm_config.copy()
-nba_data_guy_config["tools"] = nba_data_guy_settings['tools']
-nba_data_guy = GPTAssistantAgent(
-    name="NBA_Data_Guy",
-    instructions=nba_data_guy_settings['instructions'],
-    llm_config=nba_data_guy_config,
-    function_map={
-        "get_lineups": get_lineups,
-    }
-)
-
-# Document Retriever
-# Grab the functions from the assistants settings
-doc_retriever_settings = get_agent('doc_retriever')
-doc_retriever_config = llm_config.copy()
-doc_retriever_config["tools"] = doc_retriever_settings['tools']
-doc_retriever = GPTAssistantAgent(
-    name="Document_Retriever",
-    instructions=doc_retriever_settings['instructions'],
-    llm_config=doc_retriever_config,
-    function_map={
-        "data_lookup": data_lookup,
-    }
-)
-
-
-# create a UserProxyAgent instance named "user_proxy"
-user_proxy = autogen.UserProxyAgent(
-    name="user_proxy",
-    system_message="A human admin. Execute suggested function calls.",
-    is_termination_msg=lambda x: x.get("content", "") and x.get("content", "").rstrip().endswith("TERMINATE"),
-    human_input_mode="ALWAYS",
-    max_consecutive_auto_reply=10,
-    code_execution_config={
-        "work_dir": "coding",
-        "use_docker": False,
-    }
-)
-
-agents = [user_proxy, nba_analyst, nba_data_guy, doc_retriever]
-logging.info(f"Agents: {agents}")
-
-# Create Group Chat
-groupchat = autogen.GroupChat(
-    agents=agents,
-    messages=[],
-    max_round=12
-)
-
-# Create Group Chat Manager
-manager = autogen.GroupChatManager(
-    groupchat=groupchat,
-    llm_config=llm_config
-)
-
-user_proxy.initiate_chat(
-    manager, message="What's the best GSW lineup that includes Kuminga?"
-)
-
-# Delete the assistants
-for agent in agents:
-    if agent.name != 'user_proxy':
-        agent.delete_assistant()
+if __name__ == '__main__':
+    listen_on_queue()

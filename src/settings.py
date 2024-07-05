@@ -35,13 +35,15 @@ else:
 
 # Load the environment variables
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
-MONGO_DB = os.getenv('MONGO_DB')
+MONGO_URL = os.getenv('MONGO_URL')
 SYS_MODE = os.getenv('SYS_MODE')
+AGENT_QUEUE = os.getenv('AGENT_QUEUE')
+RMQ_URL = os.getenv('RMQ_URL')
 
 # Set the OpenAI API key
 openai.api_key = OPENAI_API_KEY
 
 # Connect to the database
-client = MongoClient(MONGO_DB)
+client = MongoClient(MONGO_URL)
 DB = client.swarm
 

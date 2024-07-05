@@ -1,80 +1,163 @@
-from settings import logging, DB
-from bson.objectid import ObjectId
+from settings import logging, DB, SYS_MODE
+from pymongo import ASCENDING, DESCENDING
 import json
+from bson.json_util import dumps
 
 
-def doc_lookup(oid: str, query: dict) -> list | None:
+def create_convo_doc(main_thread_id: str, init_msg: str) -> None:
     """
-    Look up info in a doc. When info is sourced via api the agent will insert it into swarm_facts collection in one
-    document. The data will be stored in an array of objects. Each object will have a key called "data" and the value
-    will be the data. Ex doc:
-    {
-        "_id": ObjectId("65a32d4a80dc2240bf9d8cbc"),
-        "data": [
-            {
-                "MIN": 100,
-                "MAX": 1000
-            },
-            {
-                "MIN": 1001,
-                "MAX": 10000
-            }
-        ]
-    }
-
-    So this function will do queries on the data array and return the data that matches the query.
-    :param oid: The id of the document.
-    :param query: The query to find the info in the doc.
-    :return: The document.
-    """
-    logging.info(f"Looking up info in doc: {oid}.")
-    coll = DB['swarm_facts']
-
-    # Aggregation pipeline
-    pipeline = [
-        {
-            "$match": {
-                "_id": ObjectId(oid)
-            }
-        },
-        {
-            "$project": {
-                "data": {
-                    "$filter": {
-                        "input": "$data",
-                        "as": "item",
-                        "cond": query
-                    }
-                }
-            }
-        }
-    ]
-
-    # Executing the aggregation query
-    result = coll.aggregate(pipeline)
-    res_list = [res for res in result]
-
-    return res_list
-
-
-def data_lookup(doc_id: str, query: str) -> str:
-    """
-    Look up data in a doc.
-    :param doc_id: The id of the document that you want to look up data in.
-    :param query: The query to find the info in the doc.
+    Create a convo document in the DB.
+    :param main_thread_id: This is the ID of the main thread. This is a constant in the system.
+    :param init_msg: The initial message that starts the convo.
     :return:
     """
 
-    # Catch the error and send it to the assistant so they can correct how they use it.
+    msg_dict = {
+        "message": init_msg,
+        "from_agent": "user",
+        "to_agent": "nba_analyst",
+        "msg_type": "message"
+    }
+
+    _coll = DB.get_collection("swarm_convos")
+    _coll.insert_one(
+        {
+            "id": main_thread_id,
+            "org_name": "nba",
+            "convo": [msg_dict]
+        }
+    )
+    logging.info("Created convo in DB.")
+    return
+
+
+def add_to_convo(main_thread_id: str, msg_dict: dict) -> bool:
+    """
+    Add a message to the conversation in the database.
+    :param main_thread_id: The main thread ID.
+    :param msg_dict: The message to add.
+    :return:
+    """
+
+    convos = DB['swarm_convos']
+
+    logging.info("Adding to convo in DB.")
+
+    # If the system is in testing mode, then don't add to the DB.
+    if SYS_MODE == "testing":
+        logging.info("Mode is testing. Not adding to convo.")
+        return True
+
     try:
-        query_dict = json.loads(query)
-        results = doc_lookup(doc_id, query_dict)
+        convos.update_one(
+            {"id": main_thread_id},
+            {
+                "$push": {
+                    "convo": msg_dict
+                }
+            }
+        )
     except Exception as e:
-        results = str(e)
+        logging.error(f"Failed to add to convo. Error: {e}")
+        return False
 
-    if not results:
-        results = "This query returned no results. Please double check that you're query is setup correctly."
-    else:
-        results = str(results)
+    return True
 
-    return json.dumps({"query": query, "results": results})
+
+def doc_lookup(query: dict, sort: str | None, limit: int | None) -> str:
+    """
+    Look up info in a collection. When info is sourced via api the agent will insert it into swarm_facts collection.
+    If the data is a list of dictionaries then they will be inserted as separate documents with a shared ID.
+    This id is used to look up the data in the collection. If the data is a single dictionary then it will be inserted
+    as a single document with the id of the document being the doc_id.
+    :param query: The query to find the info in the doc this will include the ID.
+    :param sort: The sort order.
+    :param limit: The number of documents to return.
+    :return: The document.
+    """
+
+    # Parse the sort
+    sort_map = {
+        "ASCENDING": ASCENDING,
+        "DESCENDING": DESCENDING
+    }
+
+    sort_list = []
+    if sort:
+        sort_options = sort.split(",")
+        # I could do list comprehension here but I want to keep it readable.
+        for sort_option in sort_options:
+            sort_tuple = tuple(sort_option.split(":"))
+            sort_list.append((sort_tuple[0], sort_map[sort_tuple[1]]))
+
+    coll = DB['swarm_facts']
+
+    try:
+        if sort_list and limit:
+            data = coll.find(query).sort(sort_list).limit(limit)
+        elif sort_list:
+            data = coll.find(query).sort(sort_list)
+        elif limit:
+            data = coll.find(query).limit(limit)
+        else:
+            data = coll.find(query)
+        logging.info("Found info in doc/s.")
+    except Exception as e:
+        logging.error(f"Failed to find info in doc/s. Error: {e}")
+        return f"Failed to find info in doc/s. Error: {e}"
+
+    # Convert to list of dictionaries
+    data_list = []
+    for doc in data:
+        # Remove the ID field from the document so it doesn't confuse the agent
+        del doc["_id"]
+        data_list.append(dumps(doc))
+    return str(data_list)
+
+
+def generic_create(collection: str, content: dict | list) -> bool:
+    """
+    Create a document in the database.
+    :param collection: The collection name to create the document in.
+    :param content: The content of the document.
+    :return: The ID of the document.
+    """
+    logging.info(f"Creating document in {collection}.")
+    coll = DB[collection]
+
+    # If content is a dictionary then insert one document. If it is a list then insert many documents.
+    if isinstance(content, dict):
+        try:
+            coll.insert_one(content)
+            logging.info(f"Created document in {collection}.")
+            return True
+        except Exception as e:
+            logging.error(f"Failed to create document in {collection}. Error: {e}")
+            return False
+    elif isinstance(content, list):
+        try:
+            coll.insert_many(content)
+            logging.info(f"Created documents in {collection}.")
+            return True
+        except Exception as e:
+            logging.error(f"Failed to create documents in {collection}. Error: {e}")
+            return False
+
+
+def generic_update(collection: str, query: dict, content: dict | list) -> bool:
+    """
+    Update a document in the database.
+    :param collection: The collection name to update the document in.
+    :param query: The query to find the document to update.
+    :param content: The content of the document.
+    :return: The ID of the document.
+    """
+    logging.info(f"Updating document in {collection}.")
+    coll = DB[collection]
+    try:
+        coll.update_one(query, content)
+        logging.info(f"Updated document in {collection}.")
+        return True
+    except Exception as e:
+        logging.error(f"Failed to update document in {collection}. Error: {e}")
+        return False

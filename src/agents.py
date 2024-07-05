@@ -1,4 +1,5 @@
-from settings import logging, openai, DB, SYS_MODE
+from settings import logging, openai
+from db_tools import add_to_convo as add_it_to_convo
 
 import time
 import json
@@ -73,29 +74,7 @@ class Agent:
             "msg_type": msg_type
         }
 
-        convos = DB['swarm_convos']
-
-        logging.info("Adding to convo in DB.")
-
-        # If the system is in testing mode, then don't add to the DB.
-        if SYS_MODE == "testing":
-            logging.info("Mode is testing. Not adding to convo.")
-            return True
-
-        try:
-            convos.update_one(
-                {"id": self.main_thread_id},
-                {
-                    "$push": {
-                        "convo": msg_dict
-                    }
-                }
-            )
-        except Exception as e:
-            logging.error(f"Failed to add to convo. Error: {e}")
-            return False
-
-        return True
+        return add_it_to_convo(main_thread_id=self.main_thread_id, msg_dict=msg_dict)
 
     def add_message(self, message: str) -> None:
         """

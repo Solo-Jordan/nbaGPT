@@ -4,3 +4,4 @@ nba_api
 pandas
 bson
 pymongo
+pika
