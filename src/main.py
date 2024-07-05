@@ -20,7 +20,7 @@ def listen_on_queue():
         create_convo_doc(main_thread_id, body['message'])
 
         # Call the nba_analyst function
-        nba_analyst(main_thread_id, body['message'])
+        response = nba_analyst(main_thread_id, body['message'])
 
         logging.info(f"Listening on queue: {AGENT_QUEUE}")
 
