@@ -166,7 +166,8 @@ def get_lineups(**kwargs) -> str:
 
     hint = ("Some things to consider when looking at lineup data:\n\n- You should consider sample size of lineups. "
             "Maybe include games played or minutes played in your query.\n- Net rating should generally be used as the "
-            "overall metric for lineup performance.")
+            "overall metric for lineup performance.\n- If you are looking for specific lineup combinations, you should "
+            "include the players' surname(s) in the query when doing a lookup.")
     # Add the lineups to the database
     msg = add_info_to_db(data_list, doc_id, 'lineups', hint)
 
