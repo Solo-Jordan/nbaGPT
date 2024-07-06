@@ -1,6 +1,6 @@
 from settings import logging
 from db_tools import get_agent_from_db
-from agents import Agent
+from agents.agents import Agent
 from agent_tools.nba_data_guy import function_map
 
 

@@ -1,5 +1,5 @@
 from settings import logging, RMQ_URL, AGENT_QUEUE
-from nba_analyst import nba_analyst
+from agents.nba_analyst import nba_analyst
 from db_tools import create_convo_doc
 
 from pika import BlockingConnection, URLParameters

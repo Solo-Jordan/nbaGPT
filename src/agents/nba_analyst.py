@@ -1,7 +1,7 @@
 from settings import logging
 from db_tools import get_agent_from_db
-from agents import Agent
-from nba_data_guy import nba_data_guy
+from agents.agents import Agent
+from agents.nba_data_guy import nba_data_guy
 
 from langchain import hub
 
