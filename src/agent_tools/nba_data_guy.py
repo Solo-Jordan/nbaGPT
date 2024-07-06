@@ -59,7 +59,7 @@ def get_info(endpoint, endpoint_name, **kwargs) -> tuple[dict, str | None]:
     return data_list, doc_id
 
 
-def add_info_to_db(data_list, doc_id, endpoint_name) -> str:
+def add_info_to_db(data_list, doc_id, endpoint_name, hint) -> str:
     # Add the ID and the current time to the data
     current_time = datetime.utcnow()
     for item in data_list:
@@ -77,8 +77,10 @@ def add_info_to_db(data_list, doc_id, endpoint_name) -> str:
         logging.info(f"Added lineups to DB.")
 
         dba_msg = (f"\n\nNEXT STEP: You have successfully added the {endpoint_name} info to the database. Using the "
-                   "info above you can now use the data_lookup function to query the data.")
-        return f"{endpoint_name} info added to DB with doc_id: {doc_id}\n\nExample entry:\n{schema_example}{dba_msg}"
+                   "info above you can now use the data_lookup function to query the data.\n\n")
+        msg = (f"{endpoint_name} info added to DB with doc_id: "
+               f"{doc_id}\n\nExample entry:\n{schema_example}{dba_msg}{hint}")
+        return msg
     else:
         logging.error(f"Failed to add lineups to DB.")
         return f"Failed to add {endpoint_name} info to DB."
@@ -162,8 +164,11 @@ def get_lineups(**kwargs) -> str:
     if not data_list:
         return "No lineups found."
 
+    hint = ("Some things to consider when looking at lineup data:\n\n- You should consider sample size of lineups. "
+            "Maybe include games played or minutes played in your query.\n- Net rating should generally be used as the "
+            "overall metric for lineup performance.")
     # Add the lineups to the database
-    msg = add_info_to_db(data_list, doc_id, 'lineups')
+    msg = add_info_to_db(data_list, doc_id, 'lineups', hint)
 
     return msg
 
@@ -208,8 +213,12 @@ def get_hustle_stats_team(**kwargs) -> str:
     if not data_list:
         return "No hustle stats found."
 
+    hint = ("Some things to consider when looking at hustle stats:\n\n- Deflections are a good indicator of defensive "
+            "activity.\n- Charges drawn are a good indicator of defensive positioning.\n- Screen assists are a good "
+            "indicator of offensive activity.")
+
     # Add the hustle stats to the database
-    msg = add_info_to_db(data_list, doc_id, 'hustle_stats_team')
+    msg = add_info_to_db(data_list, doc_id, 'hustle_stats_team', hint)
 
     return msg
 
@@ -291,8 +300,13 @@ def get_player_clutch_stats(**kwargs) -> str:
     if not data_list:
         return "No player clutch stats found."
 
+    hint = ("Some things to consider when looking at player clutch stats:\n\n- Clutch stats are generally defined as "
+            "stats in the last 5 minutes of a game within 5 points.\n- The RANK columns are useful for comparing "
+            "players to the rest of the league.\n- You can lookup all players from a team by including the TEAM_ID "
+            "in the query.")
+
     # Add the player clutch stats to the database
-    msg = add_info_to_db(data_list, doc_id, 'player_clutch_stats')
+    msg = add_info_to_db(data_list, doc_id, 'player_clutch_stats', hint)
 
     return msg
 
@@ -349,8 +363,12 @@ def get_player_stats() -> str:
     if not data_list:
         return "Could not retrieve player stats."
 
+    hint = ("Some things to consider when looking at player stats:\n\n- You can lookup all players from a team by "
+            "including the TEAM_ID in the query.\n- PLUS_MINUS should be used as a general indicator of a player's "
+            "performance.")
+
     # Add the player stats to the database
-    msg = add_info_to_db(data_list, doc_id, 'player_stats')
+    msg = add_info_to_db(data_list, doc_id, 'player_stats', hint)
 
     return msg
 
