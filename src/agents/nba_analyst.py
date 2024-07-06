@@ -61,7 +61,7 @@ def analyze_data(agent: Agent, data_guy: Agent, data: str) -> str:
     evaluation = agent.do_run()
 
     # If the evaluation is not "yes", then follow up with the research team until it is.
-    while evaluation.lower() != "yes":
+    while "yes" not in evaluation.lower():
         msg = "Please respond with a follow up request to the reseach team."
         agent.add_message(msg)
 
