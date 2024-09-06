@@ -44,10 +44,4 @@ This will start the application, and you can begin interacting with the model.
 - `src/settings.py`: Configuration settings for the application.
 - `requirements.txt`: Lists the Python dependencies for the project.
 
-## Contributing
 
-We welcome contributions to nbaGPT! Please fork the repository and submit a pull request with your changes.
-
-## License
-
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for more details.
