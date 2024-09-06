@@ -30,18 +30,19 @@ pip install -r requirements.txt
 To run nbaGPT, execute the following command:
 
 ```bash
-python main.py
+python src/main.py
 ```
 
 This will start the application, and you can begin interacting with the model.
 
 ## Project Structure
 
-- `main.py`: The main entry point for the application.
-- `models/`: Contains the model definitions and training scripts.
-- `data/`: Includes datasets and data processing scripts.
-- `utils/`: Utility functions and helper scripts.
-- `tests/`: Unit and integration tests for the application.
+- `src/main.py`: The main entry point for the application.
+- `src/agents/`: Contains agent-related classes and functions.
+- `src/agent_tools/`: Tools and utilities for agent operations.
+- `src/db_tools.py`: Database interaction functions.
+- `src/settings.py`: Configuration settings for the application.
+- `requirements.txt`: Lists the Python dependencies for the project.
 
 ## Contributing
 
