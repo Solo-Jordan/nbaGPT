@@ -23,6 +23,20 @@ cd nbaGPT
 pip install -r requirements.txt
 ```
 
+## Environment Variables
+
+Before running the application, create a `.env` file in the root directory with the following environment variables:
+
+```
+OPENAI_API_KEY=<your_openai_api_key>
+MONGO_URL=<your_mongo_url>
+SYS_MODE=<system_mode>
+AGENT_QUEUE=<agent_queue_name>
+RMQ_URL=<rabbitmq_url>
+```
+
+Replace the placeholders with your actual configuration values.
+
 ## Usage
 
 To run nbaGPT, execute the following command:
