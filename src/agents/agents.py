@@ -1,3 +1,5 @@
+from pydantic.v1.parse import load_file
+
 from settings import logging, openai
 from db_tools import add_to_convo as add_it_to_convo
 
@@ -76,10 +78,11 @@ class Agent:
 
         return add_it_to_convo(main_thread_id=self.main_thread_id, msg_dict=msg_dict)
 
-    def add_message(self, message: str) -> None:
+    def add_message(self, message: str, as_agent: bool = False) -> None:
         """
         Add a message to the thread.
         :param message: The message to add.
+        :param as_agent: If the message is from the agent.
         :return: None
         """
 
@@ -87,7 +90,7 @@ class Agent:
 
         self.client.beta.threads.messages.create(
             thread_id=self.thread_id,
-            role="user",
+            role="user" if not as_agent else "assistant",
             content=message
         )
 
@@ -196,3 +199,39 @@ class Agent:
                 self.response_msg = response_msg
 
         return self.response_msg
+
+    def one_off_message(self, message: str) -> str:
+        """
+        Send a one off message to the gpt-4o using chat completion.
+        :param message: The message to send.
+        :return: The response from the assistant.
+        """
+
+        logging.info(f"Sending one off message to GPT-4o.")
+
+        self.add_to_convo(response_msg=message, msg_type="message", from_agent="system", to_agent=self.name)
+
+        response = self.client.chat.completions.create(
+            model="gpt-4o",
+            messages=[
+                {
+                    "role": "system",
+                    "content": self.instructions
+                },
+                {
+                    "role": "user",
+                    "content": message
+                }
+            ]
+        )
+
+        agent_response = response.choices[0].message.content
+
+        self.add_to_convo(
+            response_msg=agent_response,
+            msg_type="message",
+            from_agent=self.name,
+            to_agent="system"
+        )
+
+        return agent_response

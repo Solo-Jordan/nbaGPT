@@ -55,11 +55,12 @@ def add_to_convo(main_thread_id: str, msg_dict: dict) -> bool:
     return True
 
 
-def get_agent_from_db(agent_call: str, org_name: str) -> dict:
+def get_agent_from_db(agent_call: str, org_name: str, agent_id: str = None) -> dict:
     """
     Get an agent from the database.
     :param agent_call: The agent call.
     :param org_name: The org name.
+    :param agent_id: The agent ID. Used for NBA Data Guys.
     :return: The agent.
     """
 
@@ -67,17 +68,31 @@ def get_agent_from_db(agent_call: str, org_name: str) -> dict:
 
     logging.info(f"Getting {agent_call} from DB.")
 
-    try:
-        agent = agents.find_one(
-            {
-                "call": agent_call,
-                "org_name": org_name
-            }
-        )
-    except Exception as e:
-        logging.error(f"Failed to get agent from DB. Error: {e}")
-        return {}
+    if agent_id:
+        try:
+            agent = agents.find_one(
+                {
+                    "call": agent_call,
+                    "org_name": org_name,
+                    "id": agent_id
+                }
+            )
+        except Exception as e:
+            logging.error(f"Failed to get agent from DB. Error: {e}")
+            return {}
+    else:
+        try:
+            agent = agents.find_one(
+                {
+                    "call": agent_call,
+                    "org_name": org_name
+                }
+            )
+        except Exception as e:
+            logging.error(f"Failed to get agent from DB. Error: {e}")
+            return {}
 
+    logging.info(f"Got {agent['call']} from DB.")
     return agent
 
 
@@ -178,3 +193,25 @@ def generic_update(collection: str, query: dict, content: dict | list) -> bool:
     except Exception as e:
         logging.error(f"Failed to update document in {collection}. Error: {e}")
         return False
+
+
+def get_nba_data_guys() -> list:
+    """
+    Get the tools for the NBA Data Guy.
+    :return: All of the NBA Data Guys
+    """
+    swarm_agents = DB['swarm_agents']
+
+    logging.info(f"Getting tools for NBA Data Guy.")
+
+    try:
+        agents = swarm_agents.find(
+            {
+                "call": "nba_data_guy"
+            }
+        )
+    except Exception as e:
+        logging.error(f"Failed to get tools for NBA Data Guy. Error: {e}")
+        return []
+
+    return agents

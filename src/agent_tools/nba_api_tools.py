@@ -379,14 +379,14 @@ def data_lookup(query: str, sort: str = None, limit: int = None) -> str:
     Lookup data in the database. This function is used to retrieve specific document data based on a given document
     ID and query.  All queries should include the id as `doc_id`. Examples:
 
-    For since doc lookup:
+    For single doc lookup:
     ```
-    {"doc_id": "0000-1111-2222-3333-4444"}
+    query = {"doc_id": "0000-1111-2222-3333-4444"}
     ```
 
     For multiple doc lookup:
     ```
-    {"doc_id": "0000-1111-2222-3333-4444", "name": "John"}
+    query = {"doc_id": "0000-1111-2222-3333-4444", "name": "John"}
     ```
     """
 
